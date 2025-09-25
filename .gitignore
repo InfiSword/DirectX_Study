@@ -1,41 +1,78 @@
-# Prerequisites
-*.d
+# ## General C/C++ ignores ##
+
+# Build output directories
+# 빌드 결과물이 저장되는 폴더들입니다.
+[Bb]uild/
+[Bb]uild*/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+ipch/
+
+# Log and temporary files
+*.log
+*.tlog
 
 # Compiled Object files
-*.slo
-*.lo
+# 컴파일 과정에서 생성되는 중간 목적 파일들입니다.
 *.o
 *.obj
+*.lo
+*.slo
 
 # Precompiled Headers
-*.gch
+# 미리 컴파일된 헤더 파일로, 빌드 속도를 향상시킵니다.
 *.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
+*.gch
 
 # Compiled Static libraries
-*.lai
-*.la
-*.a
+# 정적 라이브러리 파일들입니다.
 *.lib
+*.a
+*.la
+*.lai
+
+# Compiled Dynamic libraries
+# 동적 라이브러리 파일들입니다.
+*.dll
+*.so
+*.dylib
 
 # Executables
+# 최종 실행 파일입니다.
 *.exe
 *.out
 *.app
 
-# debug information files
+
+# ## Toolchain and IDE specific ignores ##
+
+# Visual Studio specific files
+# Visual Studio의 사용자 설정, IntelliSense 캐시 등을 포함합니다.
+.vs/
+*.suo
+*.user
+*.vcxproj.filters
+*.vcxproj.user
+
+# IntelliSense and browsing database files
+# IntelliSense 기능을 위한 캐시 파일들로 용량이 매우 큽니다.
+*.ipch
+*.sdf
+*.opendb
+
+# Linker and debugger files
+# 링커와 디버거가 사용하는 임시 파일 및 디버그 정보 파일입니다.
+*.ilk
+*.pdb
 *.dwo
+
+# Dependency files
+# 컴파일러가 생성하는 의존성 파일입니다.
+*.d
+
+# Fortran module files
+# 포트란 모듈 파일입니다.
+*.mod
+*.smod
