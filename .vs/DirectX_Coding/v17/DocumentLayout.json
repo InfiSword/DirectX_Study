@@ -1,0 +1,61 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\seif4\\Documents\\GitHub\\DirectX_Study\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{E2FD6EC7-013F-4998-8162-3E2D074C4AD0}|DirectX_Coding\\DirectX_Coding.vcxproj|C:\\Users\\seif4\\Documents\\GitHub\\DirectX_Study\\DirectX_Coding\\01_Main\\Main_Game.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{E2FD6EC7-013F-4998-8162-3E2D074C4AD0}|DirectX_Coding\\DirectX_Coding.vcxproj|solutionrelative:DirectX_Coding\\01_Main\\Main_Game.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 186,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{6d4078d1-5951-4ed1-ac0e-0a8099c1cce5}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Main_Game.cpp",
+              "DocumentMoniker": "C:\\Users\\seif4\\Documents\\GitHub\\DirectX_Study\\DirectX_Coding\\01_Main\\Main_Game.cpp",
+              "RelativeDocumentMoniker": "DirectX_Coding\\01_Main\\Main_Game.cpp",
+              "ToolTip": "C:\\Users\\seif4\\Documents\\GitHub\\DirectX_Study\\DirectX_Coding\\01_Main\\Main_Game.cpp",
+              "RelativeToolTip": "DirectX_Coding\\01_Main\\Main_Game.cpp",
+              "ViewState": "AQIAAAkAAAAAAAAAAADwvxIAAAAqAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-09-25T18:03:08.065Z",
+              "EditorCaption": ""
+            }
+          ]
+        },
+        {
+          "DockedWidth": 214,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 205,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
