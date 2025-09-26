@@ -14,7 +14,6 @@ void Main_Game::Init(HWND _hWnd)
 	m_hWnd = _hWnd;
 	m_width = WinSizeX;
 	m_height = WinSizeY;
-	// TODO
 
 	// 해당 인터페이스 포인터를 복사하거나 할 때, 레퍼런스 카운트를 1증가
 	// 생명 주기가 애매해 지는 타이밍을 방지하기 위해
@@ -26,6 +25,10 @@ void Main_Game::Init(HWND _hWnd)
 	// 해당 수동으로 생성, 해제를 하는 일이 번거롭고, 무식한 작업이기에
 	// 스마트 포인터와 마찬가지로 자동으로 관리해주는게 있으면 좋을것 같다.
 	// -> ComPtr<>
+
+	CreateDeviceAndSwapChain();
+
+	
 }
 
 void Main_Game::Update()
@@ -34,4 +37,46 @@ void Main_Game::Update()
 
 void Main_Game::Render()
 {
+}
+
+void Main_Game::CreateDeviceAndSwapChain()
+{
+	DXGI_SWAP_CHAIN_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	{
+		// 스왑체인이 사용할 버퍼(후면 버퍼)의 픽셀 단위를 정의함
+		// 정의한 버퍼의 가로와 세로 크기를 우리가 설정한 창의 크기와 동일하게 설정하여 픽셀 매칭으로 렌더링 결과물이 화면에 꽉 차도록 표시되도록 함
+		desc.BufferDesc.Width = m_width;
+		desc.BufferDesc.Height = m_height;
+
+		desc.BufferDesc.RefreshRate.Numerator = 60;
+		desc.BufferDesc.RefreshRate.Denominator = 1;
+		desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		desc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+		desc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+		
+		// 멀티 샘플링 -> 화면을 그릴 때, 계단 현상이 일어날 수 있다. ( 엘리어싱 ) -> 해결 방법중 하나는 우리가 만들 화면의 크기를 몇 배 증가시켜 크게 만든 다음, 그거에 대한 보간 값을 정하고, 해당 값으로 색상을 정하게 된다면 상대적으로 해당 계단 현상을 완화해주는 방법이 존재한다. 
+		// 이럴 때 해당 Count 숫자를 늘려보는 것을 고려할 수 있다.
+		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
+
+		// 
+		desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		
+	}
+
+	// 디바이스를 만들고, 그 다음에 SwapChain을 만든다.
+	// 한꺼번에 같이 만드는 느낌의 함수
+	//D3D11CreateDeviceAndSwapChain(
+	//	nullptr,
+	//	D3D_DRIVER_TYPE_HARDWARE,	// 우리의 하드웨어인 그래픽카드를 사용하겠다.
+	//	nullptr,
+	//	0,
+	//	nullptr,	// D3D_FEATURE_LEVEL ( 해당 DX버전에 해당하는 기능들을 지원해야 한다는 것을 명시하고, 건네주는 인자임, 입력을 안하고 null로 둔다면, 내가 지원할 수 있는 상위 버전 하나를 골라주기 때문에 사실상 null로 둬도 됨
+	//	0,
+	//	D3D11_SDK_VERSION,	// 버전 11에서 개발 시 사용한 헤더 파일과 실행 환경의 dll 버전이 서로 호환되는지 확인하기 위한 고유 정수 값
+
+
+
+	//)
 }
