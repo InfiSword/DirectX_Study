@@ -16,6 +16,11 @@ private:
 	void CreateDeviceAndSwapChain();
 	void CreateRenderTargetView();
 	void SetViewport();
+
+private:
+	void CreateGeometry();
+	void CreateInputLayout();
+
 private:
 	HWND m_hWnd;
 	uint32 m_width = 0;
@@ -75,7 +80,19 @@ private:
 	// 화면을 묘사하는 구조체 (크기 설정)
 	D3D11_VIEWPORT m_viewport = {0};
 
-	float m_clearColor[4] = { 0.5f, 0.5f, 0.5f,0.5f };
+	float m_clearColor[4] = { 0.f, 0.f, 0.f,0.f };
 
+private:
+	// Geometry
+	vector<Vertex> m_vertices;
+	ComPtr<ID3D11Buffer> m_vertexBuffer = nullptr;
+
+	// VS
+	ComPtr<ID3D11VertexShader> m_vertexShader = nullptr;
+	ComPtr<ID3DBlob> m_vsBlob = nullptr;
+
+	// PS
+	ComPtr<ID3D11PixelShader> m_pixelShader = nullptr;
+	
 };
 
