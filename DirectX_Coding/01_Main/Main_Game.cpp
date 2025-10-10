@@ -27,8 +27,8 @@ void Main_Game::Init(HWND _hWnd)
 	// -> ComPtr<>
 
 	CreateDeviceAndSwapChain();
-
-	
+	CreateRenderTargetView();
+	SetViewport();
 }
 
 void Main_Game::Update()
@@ -37,6 +37,37 @@ void Main_Game::Update()
 
 void Main_Game::Render()
 {
+	RenderBegin();
+
+	RenderEnd();
+
+}
+
+void Main_Game::RenderBegin()
+{
+	// 렌더링 파이프라이닝에서 Output Merge -> OEM단계
+	// 해당 그림을 그릴 도화지(후면 버퍼)에 해당 리소스를 제출
+	// 해당 캔버스에 그림을 그릴것 이라는, 공식적 선언
+	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), nullptr);
+	
+	// 해당 코드는 캔버스를 특정 색상으로 깨끗하게 지우는 역할
+	// 후면 버퍼에는 이전 프레임에 그렸던 그림이 그대로 남아있기에, 이걸
+	// 지워주는 역할을 한다.
+	// 즉, 후면 버퍼에 그림을 해당 색상으로 전부 밀어버리는 것
+	m_deviceContext->ClearRenderTargetView(m_renderTargetView.Get(), m_clearColor);	
+
+	// 캔버스의 어느 영역에 그림을 그릴지 설정
+	m_deviceContext->RSSetViewports(1, &m_viewport);
+}
+
+void Main_Game::RenderEnd()
+{
+	// [후면] -> [전면]
+	// 후면 버퍼의 내용을 전면 버퍼로 전해달라 
+	// 버퍼 교체(Swap)를 실행하는 단계, 후면 버퍼에 그림을 완성하고,
+	// 이 후면 버퍼를 사용자가 보고 있는 전면 버퍼로 맞바꾸게 된다.
+	HRESULT hr =  m_swapChain->Present(1, 0);
+	assert(SUCCEEDED(hr));
 }
 
 void Main_Game::CreateDeviceAndSwapChain()
@@ -60,23 +91,68 @@ void Main_Game::CreateDeviceAndSwapChain()
 		desc.SampleDesc.Count = 1;
 		desc.SampleDesc.Quality = 0;
 
-		// 
+		// 해당 버퍼를 어떻게 사용할 것인가
+		// -> GPU가 연산을 마치고, 최종적인 어떤 색상( 모든 셰이더 연산 )을 그려야 하는지 알아냈을 때,
+		// 그 연산 결과물을 그려주겠다. ( 후면 버퍼에 렌더링 하겠다. -> 화면을 그리는 용도 -> 스왑 체인의 후면 버퍼)
+		// -> 렌더링 파이프라인의 최종 출력 대상이 되겠다.
 		desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+
+		// 해당 후면 버퍼를 하나만 사용하겠다. 
+		desc.BufferCount = 1;
+		desc.OutputWindow = m_hWnd;		
+		desc.Windowed = true;
+
+		desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 		
 	}
 
 	// 디바이스를 만들고, 그 다음에 SwapChain을 만든다.
 	// 한꺼번에 같이 만드는 느낌의 함수
-	//D3D11CreateDeviceAndSwapChain(
-	//	nullptr,
-	//	D3D_DRIVER_TYPE_HARDWARE,	// 우리의 하드웨어인 그래픽카드를 사용하겠다.
-	//	nullptr,
-	//	0,
-	//	nullptr,	// D3D_FEATURE_LEVEL ( 해당 DX버전에 해당하는 기능들을 지원해야 한다는 것을 명시하고, 건네주는 인자임, 입력을 안하고 null로 둔다면, 내가 지원할 수 있는 상위 버전 하나를 골라주기 때문에 사실상 null로 둬도 됨
-	//	0,
-	//	D3D11_SDK_VERSION,	// 버전 11에서 개발 시 사용한 헤더 파일과 실행 환경의 dll 버전이 서로 호환되는지 확인하기 위한 고유 정수 값
+	HRESULT hr = D3D11CreateDeviceAndSwapChain(
+		nullptr,
+		D3D_DRIVER_TYPE_HARDWARE,	// 우리의 하드웨어인 그래픽카드를 사용하겠다.
+		nullptr,
+		0,
+		nullptr,	// D3D_FEATURE_LEVEL ( 해당 DX버전에 해당하는 기능들을 지원해야 한다는 것을 명시하고, 건네주는 인자임, 입력을 안하고 null로 둔다면, 내가 지원할 수 있는 상위 버전 하나를 골라주기 때문에 사실상 null로 둬도 됨
+		0,
+		D3D11_SDK_VERSION,	// 버전 11에서 개발 시 사용한 헤더 파일과 실행 환경의 dll 버전이 서로 호환되는지 확인하기 위한 고유 정수 값
+		&desc,
+		m_swapChain.GetAddressOf(),
+		m_device.GetAddressOf(),
+		nullptr,
+		m_deviceContext.GetAddressOf()
+	);
+
+	assert(SUCCEEDED(hr));
+
+}
+
+void Main_Game::CreateRenderTargetView()
+{
+	HRESULT hr;
+
+	// 후면버퍼에서 해당 리소스를 Texture2D로 내보냄 -> 빈 캔버스
+	ComPtr<ID3D11Texture2D> backBuffer = nullptr;
+	hr = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)backBuffer.GetAddressOf());
+
+	assert(SUCCEEDED(hr));
+
+	// 후면 버퍼에, 해당 backBuffer 캔버스를 지정해서, 다음에 그릴 도화지를
+	// 가리킴
+	m_device->CreateRenderTargetView(backBuffer.Get(), nullptr, m_renderTargetView.GetAddressOf());
+
+	assert(SUCCEEDED(hr));
+
+}
+
+void Main_Game::SetViewport()
+{
+	m_viewport.TopLeftX = 0.f;
+	m_viewport.TopLeftY = 0.f;
+	m_viewport.Width = static_cast<float>(m_width);
+	m_viewport.Height = static_cast<float>(m_height);
+	m_viewport.MinDepth = 0.f;
+	m_viewport.MaxDepth = 1.f;
 
 
-
-	//)
 }
