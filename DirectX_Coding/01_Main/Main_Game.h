@@ -11,7 +11,15 @@ public:
 	void Render();
 
 private:
+	void RenderBegin();
+	void RenderEnd();
 	void CreateDeviceAndSwapChain();
+	void CreateRenderTargetView();
+	void SetViewport();
+
+private:
+	void CreateGeometry();
+	void CreateInputLayout();
 
 private:
 	HWND m_hWnd;
@@ -51,6 +59,7 @@ private:
 	//		3) 그 이후에는 해당 인터페이스의 함수를 호출시켜 우리가 아는 C++방식처럼 동작시킨다.
 
 
+	// Device & SwapChain
 	// 디바이스 관련 무언갈 생성할 때 사용
 	ComPtr<ID3D11Device> m_device = nullptr;
 	// 렌더링 파이프라인에 연결할 때 사용함
@@ -62,5 +71,28 @@ private:
 	// 후면 버퍼에 GPU가 다음 장면을 그린다 -> 이 때 사용자는 전면 버퍼를 보고 있는다. -> 장면을 다 그리면, 이 때 해당 GPU는 방금 그림을 다 그린 후면 버퍼를 새로운 전면 버퍼라고 선언하고, 모니터가 이 버퍼(바뀌고 난 뒤의 전면 버퍼)를 표시하도록 한다. -> 동시에 기존에 전면 버퍼였던 버퍼는 다시 다음 그림을 그릴 후면 버퍼가 된다.
 	// 더블 버퍼링과 다르게, 무거운 화면 데이터를 복사하는 대신에 포인터만 바꿔 교환이 일어나는 것이다.
 	ComPtr<IDXGISwapChain> m_swapChain = nullptr;
+
+	// Render Target View
+	// 후면 버퍼를 묘사함
+	ComPtr<ID3D11RenderTargetView> m_renderTargetView = nullptr;
+
+	// Misc
+	// 화면을 묘사하는 구조체 (크기 설정)
+	D3D11_VIEWPORT m_viewport = {0};
+
+	float m_clearColor[4] = { 0.f, 0.f, 0.f,0.f };
+
+private:
+	// Geometry
+	vector<Vertex> m_vertices;
+	ComPtr<ID3D11Buffer> m_vertexBuffer = nullptr;
+
+	// VS
+	ComPtr<ID3D11VertexShader> m_vertexShader = nullptr;
+	ComPtr<ID3DBlob> m_vsBlob = nullptr;
+
+	// PS
+	ComPtr<ID3D11PixelShader> m_pixelShader = nullptr;
+	
 };
 

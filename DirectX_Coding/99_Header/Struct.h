@@ -1,8 +1,8 @@
 #pragma once
 #include "Types.h"
 
-struct SampleVertex
+struct Vertex
 {
 	Vec3 Pos;
-	Vec2 Tex;
+	Color color;
 };
