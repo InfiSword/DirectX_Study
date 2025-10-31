@@ -29,6 +29,11 @@ void Main_Game::Init(HWND _hWnd)
 	CreateDeviceAndSwapChain();
 	CreateRenderTargetView();
 	SetViewport();
+
+	CreateGeometry();
+	CreateVS();
+	CreateInputLayout();
+	CreatePS();
 }
 
 void Main_Game::Update()
@@ -38,7 +43,37 @@ void Main_Game::Update()
 void Main_Game::Render()
 {
 	RenderBegin();
+	
+	// IA - VS - RS - PS - OW
+	// 여기서 쉐이더 리소스나, 기타 필요 기능들을 연결해 줘야 함
+	{
+		uint32 stride = sizeof(Vertex);
+		uint32 offset = 0;
 
+		// IA
+		// m_vertexBuffer.GetAddressOf() => GPU에 존재하는 버텍스 포인터
+		m_deviceContext->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
+
+		m_deviceContext->IASetInputLayout(m_inputLayout
+			.Get());
+
+		// 점과 점을 어떻게 이어붙일지 정해줌 -> 삼각형으로 인지해달라.
+		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		// VS
+		m_deviceContext->VSSetShader(m_vertexShader.Get(), nullptr, 0);
+
+		// RS
+
+		// PS
+		m_deviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
+
+		// OM
+
+		m_deviceContext->Draw(m_vertices.size(), 0);
+	}
+	
+	
 	RenderEnd();
 
 }
@@ -185,7 +220,7 @@ void Main_Game::CreateGeometry()
 		// 정점버퍼로 데이터를 공급하는 역할로써 사용하겠다는 플레그 사용
 		desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		desc.ByteWidth = (uint32)(sizeof(Vertex) * m_vertices.size());
-				
+
 		// CPU에 있는 RAM메모리 데이터를 GPU에게 전달하기 위한 구조체
 		D3D11_SUBRESOURCE_DATA data;
 		ZeroMemory(&data, sizeof(data));
@@ -210,5 +245,46 @@ void Main_Game::CreateInputLayout()
 	};
 
 	const int32 count = sizeof(layout) / sizeof(D3D11_INPUT_ELEMENT_DESC);
-	//m_device->CreateInputLayout(layout, count, );
+	m_device->CreateInputLayout(layout, count, m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), m_inputLayout.GetAddressOf());
+}
+
+void Main_Game::LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob)
+{
+	const uint32 compileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+
+	HRESULT hr = ::D3DCompileFromFile(
+		path.c_str(),
+		nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		name.c_str(),
+		version.c_str(),
+		compileFlag,
+		0,
+		blob.GetAddressOf(),
+		nullptr);
+
+	assert(SUCCEEDED(hr));
+}
+
+void Main_Game::CreateVS()
+{
+	// 표준 버텍스 쉐이더 버전사용
+	LoadShaderFromFile(L"../DirectX_Coding/98_Shader/Default.hlsl", "VS", "vs_5_0", m_vsBlob);
+
+	// blob의 정보들을 가지고 버텍스 쉐이더를 만들어준다.
+	HRESULT hr = m_device->CreateVertexShader(m_vsBlob->GetBufferPointer(),
+		m_vsBlob->GetBufferSize(), nullptr, m_vertexShader.GetAddressOf());
+
+	assert(SUCCEEDED(hr));
+}
+
+void Main_Game::CreatePS()
+{ 
+	LoadShaderFromFile(L"../DirectX_Coding/98_Shader/Default.hlsl", "PS", "ps_5_0", m_psBlob);
+
+	// blob의 정보들을 가지고 픽셀 쉐이더를 만들어준다.
+	HRESULT hr = m_device->CreatePixelShader(m_psBlob->GetBufferPointer(),
+		m_psBlob->GetBufferSize(), nullptr, m_pixelShader.GetAddressOf());
+
+	assert(SUCCEEDED(hr));
 }

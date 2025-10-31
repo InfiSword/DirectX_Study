@@ -2,12 +2,12 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\seif4\Documents\GitHub\DirectX_Study\Build\DirectX_Coding.exe</FullPath>
+      <FullPath>E:\Project\DirectX_Study\Build\DirectX_Coding.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles>
     <ContentFile>
-      <FullPath>C:\Users\seif4\Documents\GitHub\DirectX_Study\Build\Default.cso</FullPath>
+      <FullPath>E:\Project\DirectX_Study\Build\Default.cso</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />
