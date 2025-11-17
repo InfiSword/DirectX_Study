@@ -3,10 +3,12 @@
 
 Main_Game::Main_Game()
 {
+
 }
 
 Main_Game::~Main_Game()
 {
+
 }
 
 void Main_Game::Init(HWND _hWnd)
