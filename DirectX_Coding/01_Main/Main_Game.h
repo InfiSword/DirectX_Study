@@ -25,7 +25,8 @@ private:
 	
 	void CreateVS();
 	void CreatePS();
-
+	// Ω¶¿Ã¥ı ∏Æº“Ω∫ ∫‰
+	void CreateSRV();
 private:
 	HWND m_hWnd;
 	uint32 m_width = 0;
@@ -93,6 +94,9 @@ private:
 	ComPtr<ID3D11Buffer> m_vertexBuffer = nullptr;
 	ComPtr<ID3D11InputLayout> m_inputLayout = nullptr;
 
+	vector<uint32> m_indexs;
+	ComPtr<ID3D11Buffer> m_indexsBuffer = nullptr;
+
 	// VS -> πˆ≈ÿΩ∫ Ω¶¿Ã¥ı
 	ComPtr<ID3D11VertexShader> m_vertexShader = nullptr;
 	ComPtr<ID3DBlob> m_vsBlob = nullptr;
@@ -100,6 +104,10 @@ private:
 	// PS -> «»ºø Ω¶¿Ã¥ı
 	ComPtr<ID3D11PixelShader> m_pixelShader = nullptr;
 	ComPtr<ID3DBlob> m_psBlob = nullptr;
+
+
+	//SRV
+	ComPtr<ID3D11ShaderResourceView> m_shaderResourceView = nullptr;
 
 };
 

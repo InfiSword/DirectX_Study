@@ -36,6 +36,8 @@ void Main_Game::Init(HWND _hWnd)
 	CreateVS();
 	CreateInputLayout();
 	CreatePS();
+
+	CreateSRV();
 }
 
 void Main_Game::Update()
@@ -45,7 +47,7 @@ void Main_Game::Update()
 void Main_Game::Render()
 {
 	RenderBegin();
-	
+
 	// IA - VS - RS - PS - OW
 	// 여기서 쉐이더 리소스나, 기타 필요 기능들을 연결해 줘야 함
 	{
@@ -55,6 +57,8 @@ void Main_Game::Render()
 		// IA
 		// m_vertexBuffer.GetAddressOf() => GPU에 존재하는 버텍스 포인터
 		m_deviceContext->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
+
+		m_deviceContext->IASetIndexBuffer(m_indexsBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
 		m_deviceContext->IASetInputLayout(m_inputLayout
 			.Get());
@@ -69,13 +73,15 @@ void Main_Game::Render()
 
 		// PS
 		m_deviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
-
+		m_deviceContext->PSSetShaderResources(0, 1, m_shaderResourceView.GetAddressOf());
+		
 		// OM
 
-		m_deviceContext->Draw(m_vertices.size(), 0);
+		//m_deviceContext->Draw(m_vertices.size(), 0);
+		m_deviceContext->DrawIndexed(m_indexs.size(), 0, 0);
 	}
-	
-	
+
+
 	RenderEnd();
 
 }
@@ -199,7 +205,7 @@ void Main_Game::CreateGeometry()
 	// VertexData 
 	// CPU가 사용하는 RAM에 우리가 그리려는 도형의 정보를 만듬
 	{
-		m_vertices.resize(3);
+		/*m_vertices.resize(3);
 
 		m_vertices[0].Pos = Vec3{ -0.5f, -0.5f ,0 };
 		m_vertices[0].color = Color{ 1.f, 0.f, 0.f, 0.f };
@@ -208,8 +214,26 @@ void Main_Game::CreateGeometry()
 		m_vertices[1].color = Color{ 0.f, 1.f, 0.f, 0.f };
 
 		m_vertices[2].Pos = Vec3{ 0.5f,-0.5f,0.f };
-		m_vertices[2].color = Color{ 0.f, 0.f, 1.f, 0.f };
+		m_vertices[2].color = Color{ 0.f, 0.f, 1.f, 0.f };*/
 
+		// 012, 213
+		m_vertices.resize(4);
+
+		m_vertices[0].Pos = Vec3{ -0.5f, -0.5f ,0 };
+		//m_vertices[0].color = Color{ 1.f, 0.f, 0.f, 0.f };
+		m_vertices[0].uv = Vec2(0.f, 1.f);
+
+		m_vertices[1].Pos = Vec3{ -0.5f, 0.5f,0.f };
+		//m_vertices[1].color = Color{ 1.f, 0.f, 0.f, 0.f };
+		m_vertices[1].uv = Vec2(0.f, 0.f);
+
+		m_vertices[2].Pos = Vec3{ 0.5f,-0.5f,0.f };
+		//m_vertices[2].color = Color{ 1.f, 0.f, 0.f, 0.f };
+		m_vertices[2].uv = Vec2(1.f, 1.f);
+
+		m_vertices[3].Pos = Vec3{ 0.5f,0.5f,0.f };
+		//m_vertices[3].color = Color{ 1.f, 0.f, 0.f, 0.f };
+		m_vertices[3].uv = Vec2(1.f, 0.f);
 	}
 
 	// VertexBuffer
@@ -230,7 +254,30 @@ void Main_Game::CreateGeometry()
 		data.pSysMem = m_vertices.data();
 
 		// 정점으로 이뤄진 데이터 버퍼가 생성되고, 해당 버퍼는 VRAM에 생성된다.
-		m_device->CreateBuffer(&desc, &data, m_vertexBuffer.GetAddressOf());
+		HRESULT hr = m_device->CreateBuffer(&desc, &data, m_vertexBuffer.GetAddressOf());
+		assert(SUCCEEDED(hr));
+	}
+
+	// index
+	{
+		m_indexs = { 0,1,2,2,1,3 };
+	}
+	// indexBuffer
+	{
+		D3D11_BUFFER_DESC desc;
+		ZeroMemory(&desc, sizeof(desc));
+		desc.Usage = D3D11_USAGE_IMMUTABLE;
+		desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		desc.ByteWidth = (uint32)(sizeof(uint32) * m_indexs.size());
+
+		D3D11_SUBRESOURCE_DATA data;
+		ZeroMemory(&data, sizeof(data));
+		data.pSysMem = m_indexs.data();
+
+		// 정점으로 이뤄진 데이터 버퍼가 생성되고, 해당 버퍼는 VRAM에 생성된다.
+		HRESULT hr = m_device->CreateBuffer(&desc, &data, m_indexsBuffer.GetAddressOf());
+
+		assert(SUCCEEDED(hr));
 	}
 }
 
@@ -241,18 +288,24 @@ void Main_Game::CreateInputLayout()
 		{
 			"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA,0
 		},
-		{
+		/*{
 			"COLOR",0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0
+		},*/
+		{
+			"TEXCOORD",0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0
 		},
 	};
 
 	const int32 count = sizeof(layout) / sizeof(D3D11_INPUT_ELEMENT_DESC);
+	//m_device->CreateInputLayout(layout, count, m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), m_inputLayout.GetAddressOf());
 	m_device->CreateInputLayout(layout, count, m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), m_inputLayout.GetAddressOf());
 }
 
 void Main_Game::LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob)
 {
 	const uint32 compileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+
+	ComPtr<ID3DBlob> errorBlob = nullptr;
 
 	HRESULT hr = ::D3DCompileFromFile(
 		path.c_str(),
@@ -263,8 +316,17 @@ void Main_Game::LoadShaderFromFile(const wstring& path, const string& name, cons
 		compileFlag,
 		0,
 		blob.GetAddressOf(),
-		nullptr);
+		errorBlob.GetAddressOf());
 
+	if (FAILED(hr))
+	{
+		if (errorBlob != nullptr)
+		{
+			// 에러 메시지를 문자열로 변환하여 출력
+			char* errorMsg = (char*)errorBlob->GetBufferPointer();
+			MessageBoxA(nullptr, errorMsg, "Shader Compile Error", MB_OK);
+		}
+	}
 	assert(SUCCEEDED(hr));
 }
 
@@ -281,12 +343,25 @@ void Main_Game::CreateVS()
 }
 
 void Main_Game::CreatePS()
-{ 
+{
 	LoadShaderFromFile(L"../DirectX_Coding/98_Shader/Default.hlsl", "PS", "ps_5_0", m_psBlob);
 
 	// blob의 정보들을 가지고 픽셀 쉐이더를 만들어준다.
 	HRESULT hr = m_device->CreatePixelShader(m_psBlob->GetBufferPointer(),
 		m_psBlob->GetBufferSize(), nullptr, m_pixelShader.GetAddressOf());
+
+	assert(SUCCEEDED(hr));
+}
+
+void Main_Game::CreateSRV()
+{
+	DirectX::TexMetadata md;
+	DirectX::ScratchImage img;
+	HRESULT hr = LoadFromWICFile(L"..\\Resources\\MasterYi.png", WIC_FLAGS_NONE, &md, img);
+	
+	assert(SUCCEEDED(hr));
+
+	hr = CreateShaderResourceView(m_device.Get(), img.GetImages(), img.GetImageCount(), md, m_shaderResourceView.GetAddressOf());
 
 	assert(SUCCEEDED(hr));
 }

@@ -3,27 +3,35 @@
 struct VS_INPUT
 {
 	float4 position : POSITION;
-	float4 color : COLOR;
+	//float4 color : COLOR;
+	float2 uv : TEXCOORD;
 };
 
 // vertex shader
 struct VS_OUTPUT
 {
 	float4 position : SV_POSITION;
-	float4 color : COLOR;
+	// float4 color : COLOR;
+	float2 uv : TEXCOORD;
 };
+
+Texture2D texture0 : register(t0);
+SamplerState sampler0 : register(s0);
 
 // IA - VS - RS - PS - OM
 VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output;
 	output.position = input.position;
-	output.color = input.color;
+	/*output.color = input.color;*/
+	output.uv = input.uv;
 
 	return output;
 }
 
 float4 PS(VS_OUTPUT output) : SV_Target
 {
-	return output.color;
+	float4 color = texture0.Sample(sampler0, output.uv);
+	// return output.color;
+	return color;
 }
