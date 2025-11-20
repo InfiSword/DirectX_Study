@@ -205,10 +205,10 @@ void Main_Game::CreateGeometry()
 		m_vertices[0].color = Color{ 1.f, 0.f, 0.f, 0.f };
 
 		m_vertices[1].Pos = Vec3{ 0.f,0.5f,0.f };
-		m_vertices[1].color = Color{ 1.f, 0.f, 0.f, 0.f };
+		m_vertices[1].color = Color{ 0.f, 1.f, 0.f, 0.f };
 
 		m_vertices[2].Pos = Vec3{ 0.5f,-0.5f,0.f };
-		m_vertices[2].color = Color{ 1.f, 0.f, 0.f, 0.f };
+		m_vertices[2].color = Color{ 0.f, 0.f, 1.f, 0.f };
 
 	}
 
