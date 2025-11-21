@@ -38,10 +38,22 @@ void Main_Game::Init(HWND _hWnd)
 	CreatePS();
 
 	CreateSRV();
+	CreateConstantBuffer();
 }
 
 void Main_Game::Update()
 {
+	m_transformData.offset.x += 0.0003f;
+	m_transformData.offset.y += 0.0003f;
+
+	D3D11_MAPPED_SUBRESOURCE supResource;
+	ZeroMemory(&supResource, sizeof(supResource));
+
+	m_deviceContext->Map(m_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &supResource);	
+	memcpy(supResource.pData, &m_transformData, sizeof(m_transformData));
+	m_deviceContext->Unmap(m_constantBuffer.Get(), 0);
+
+
 }
 
 void Main_Game::Render()
@@ -68,7 +80,7 @@ void Main_Game::Render()
 
 		// VS
 		m_deviceContext->VSSetShader(m_vertexShader.Get(), nullptr, 0);
-
+		m_deviceContext->VSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
 		// RS
 
 		// PS
@@ -262,6 +274,7 @@ void Main_Game::CreateGeometry()
 	{
 		m_indexs = { 0,1,2,2,1,3 };
 	}
+
 	// indexBuffer
 	{
 		D3D11_BUFFER_DESC desc;
@@ -363,5 +376,19 @@ void Main_Game::CreateSRV()
 
 	hr = CreateShaderResourceView(m_device.Get(), img.GetImages(), img.GetImageCount(), md, m_shaderResourceView.GetAddressOf());
 
+	assert(SUCCEEDED(hr));
+}
+
+void Main_Game::CreateConstantBuffer()
+{
+	D3D11_BUFFER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.Usage = D3D11_USAGE_DYNAMIC;	// Cpu Write, Gpu Read
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;	// 상수 버퍼 
+	desc.ByteWidth = sizeof(TransformData);
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	HRESULT hr = m_device->CreateBuffer(&desc, nullptr, m_constantBuffer.GetAddressOf());
+	
 	assert(SUCCEEDED(hr));
 }

@@ -22,11 +22,13 @@ private:
 	void CreateInputLayout();
 
 	void LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob);
-	
+
 	void CreateVS();
 	void CreatePS();
 	// 쉐이더 리소스 뷰
 	void CreateSRV();
+
+	void CreateConstantBuffer();
 private:
 	HWND m_hWnd;
 	uint32 m_width = 0;
@@ -58,7 +60,7 @@ private:
 	//		2) 해당 함수를 통해서, 특정 CLSID에 해당하는 클래스 팩토리를 생성하고, 이 클래스 팩토리의 IClassFactory 인터페이스 포인터를 ole32.dll에게 반환한다.
 	//		3) ole32.dll은 이제 이 클래스 팩토리에 CreateInstance 메서드를 호출하여, 해당 CreateInstance 내부에서 해당 프로그램에서 호출된 인터페이스를 구현하는 실제 C++클래스의 객체를 메모리에 할당하고 초기화한다. 여기서 해당 실제 구현부 클래스가 바로 COM객체인 것이다. 결국, 해당 인터페이스 포인터의 메모리는 실제 구현부 C++ 클래스 객체(COM 객체)를 가리키게 된다.	
 	//		4) 이 때, vtable를 해당 클래스마다 1개씩 생성되게 되며, 해당 클래스의 객체마다 vpointer가 생기고, 해당 vpointer가 해당 클래스의 vtable을 가리키게 된다. 만약 어떤 객체가 가상함수를 호출하면, 해당 객체의 메모리에서 vpointer를 읽어와, vtable에 접근하여, 호출하려는 가상함수에 해당하는 함수 포인터(해당 가상 함수의 구현부)를 가져온다. 
-	
+
 	// 4. 인터페이스 포인터 반환과 동작
 	//		1) CreateInstance는 해당 생성된 객체의 주소, 즉 vpointer가 있는 주소를 해당 프로그램이 호출한 인터페이스 포인터 타입으로 캐스팅하여 ole32.dll에게 반환한다.
 	//		2) ole32.dll은 이 포인터를 다시 우리 프로그램이 선언한 인터페이스 포인터 변수에 저장된다.
@@ -69,8 +71,8 @@ private:
 	// 디바이스 관련 무언갈 생성할 때 사용
 	ComPtr<ID3D11Device> m_device = nullptr;
 	// 렌더링 파이프라인에 연결할 때 사용함
-	ComPtr<ID3D11DeviceContext> m_deviceContext = nullptr;	
-	
+	ComPtr<ID3D11DeviceContext> m_deviceContext = nullptr;
+
 	// DXGI이라는 자주 바뀌지않는 화면처리 기능을 따로 빼놓고 관리함
 	// DX9, 11, 12 상관없이 DXGI는 공통적으로 사용할 수 있으므로 따로 빼놨구나
 	// SwapChain이란? -> 더블 버퍼링같은 느낌임
@@ -84,7 +86,7 @@ private:
 
 	// Misc
 	// 화면을 묘사하는 구조체 (크기 설정)
-	D3D11_VIEWPORT m_viewport = {0};
+	D3D11_VIEWPORT m_viewport = { 0 };
 
 	float m_clearColor[4] = { 0.f, 0.f, 0.f,0.f };
 
@@ -109,5 +111,8 @@ private:
 	//SRV
 	ComPtr<ID3D11ShaderResourceView> m_shaderResourceView = nullptr;
 
+private:
+	TransformData m_transformData;
+	ComPtr<ID3D11Buffer> m_constantBuffer;
 };
 
