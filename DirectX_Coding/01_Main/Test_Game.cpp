@@ -1,17 +1,17 @@
 #include "../99_Header/Main/pch.h"
-#include "Main_Game.h"
+#include "Test_Game.h"
 
-Main_Game::Main_Game()
+Test_Game::Test_Game()
 {
 
 }
 
-Main_Game::~Main_Game()
+Test_Game::~Test_Game()
 {
 
 }
 
-void Main_Game::Init(HWND _hWnd)
+void Test_Game::Init(HWND _hWnd)
 {
 	m_hWnd = _hWnd;
 	m_width = WinSizeX;
@@ -37,14 +37,19 @@ void Main_Game::Init(HWND _hWnd)
 	CreateInputLayout();
 	CreatePS();
 
+	CreateRasterizerState();
+	CreateSamplerState();
+	CreateBlendState();
+
 	CreateSRV();
 	CreateConstantBuffer();
 }
 
-void Main_Game::Update()
+void Test_Game::Update()
 {
-	m_transformData.offset.x += 0.0003f;
-	m_transformData.offset.y += 0.0003f;
+	// Scale, Rotation, Translation
+	//m_transformData.offset.x += 0.0003f;
+	//m_transformData.offset.y += 0.0003f;
 
 	D3D11_MAPPED_SUBRESOURCE supResource;
 	ZeroMemory(&supResource, sizeof(supResource));
@@ -56,7 +61,7 @@ void Main_Game::Update()
 
 }
 
-void Main_Game::Render()
+void Test_Game::Render()
 {
 	RenderBegin();
 
@@ -69,25 +74,25 @@ void Main_Game::Render()
 		// IA
 		// m_vertexBuffer.GetAddressOf() => GPU에 존재하는 버텍스 포인터
 		m_deviceContext->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
-
 		m_deviceContext->IASetIndexBuffer(m_indexsBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-
-		m_deviceContext->IASetInputLayout(m_inputLayout
-			.Get());
-
+		m_deviceContext->IASetInputLayout(m_inputLayout.Get());
 		// 점과 점을 어떻게 이어붙일지 정해줌 -> 삼각형으로 인지해달라.
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		// VS
+  		// VS
 		m_deviceContext->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 		m_deviceContext->VSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
-		// RS
+
+		// RS - 레스터라이저
+		m_deviceContext->RSSetState(m_rasterizerState.Get());
 
 		// PS
 		m_deviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 		m_deviceContext->PSSetShaderResources(0, 1, m_shaderResourceView.GetAddressOf());
-		
+		m_deviceContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
+
 		// OM
+		m_deviceContext->OMSetBlendState(m_blendState.Get(), nullptr, 0xffffffff);
 
 		//m_deviceContext->Draw(m_vertices.size(), 0);
 		m_deviceContext->DrawIndexed(m_indexs.size(), 0, 0);
@@ -98,7 +103,7 @@ void Main_Game::Render()
 
 }
 
-void Main_Game::RenderBegin()
+void Test_Game::RenderBegin()
 {
 	// 렌더링 파이프라이닝에서 Output Merge -> OEM단계
 	// 해당 그림을 그릴 도화지(후면 버퍼)에 해당 리소스를 제출
@@ -115,7 +120,7 @@ void Main_Game::RenderBegin()
 	m_deviceContext->RSSetViewports(1, &m_viewport);
 }
 
-void Main_Game::RenderEnd()
+void Test_Game::RenderEnd()
 {
 	// [후면] -> [전면]
 	// 후면 버퍼의 내용을 전면 버퍼로 전해달라 
@@ -125,7 +130,7 @@ void Main_Game::RenderEnd()
 	assert(SUCCEEDED(hr));
 }
 
-void Main_Game::CreateDeviceAndSwapChain()
+void Test_Game::CreateDeviceAndSwapChain()
 {
 	DXGI_SWAP_CHAIN_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
@@ -182,7 +187,7 @@ void Main_Game::CreateDeviceAndSwapChain()
 
 }
 
-void Main_Game::CreateRenderTargetView()
+void Test_Game::CreateRenderTargetView()
 {
 	HRESULT hr;
 
@@ -200,7 +205,7 @@ void Main_Game::CreateRenderTargetView()
 
 }
 
-void Main_Game::SetViewport()
+void Test_Game::SetViewport()
 {
 	m_viewport.TopLeftX = 0.f;
 	m_viewport.TopLeftY = 0.f;
@@ -212,7 +217,7 @@ void Main_Game::SetViewport()
 
 }
 
-void Main_Game::CreateGeometry()
+void Test_Game::CreateGeometry()
 {
 	// VertexData 
 	// CPU가 사용하는 RAM에 우리가 그리려는 도형의 정보를 만듬
@@ -294,7 +299,9 @@ void Main_Game::CreateGeometry()
 	}
 }
 
-void Main_Game::CreateInputLayout()
+// 버텍스 쉐이더 단계에서 좌표를 이동시켜, 굳이 우리가 기하학적인 도형의 좌표를 일일히 손을 대지 않아도, 쉐이더에서 좌표를 이동시켜서, 도형을 움직이는 효과를 낼 수 있다.	
+
+void Test_Game::CreateInputLayout()
 {
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -314,7 +321,7 @@ void Main_Game::CreateInputLayout()
 	m_device->CreateInputLayout(layout, count, m_vsBlob->GetBufferPointer(), m_vsBlob->GetBufferSize(), m_inputLayout.GetAddressOf());
 }
 
-void Main_Game::LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob)
+void Test_Game::LoadShaderFromFile(const wstring& path, const string& name, const string& version, ComPtr<ID3DBlob>& blob)
 {
 	const uint32 compileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 
@@ -343,7 +350,7 @@ void Main_Game::LoadShaderFromFile(const wstring& path, const string& name, cons
 	assert(SUCCEEDED(hr));
 }
 
-void Main_Game::CreateVS()
+void Test_Game::CreateVS()
 {
 	// 표준 버텍스 쉐이더 버전사용
 	LoadShaderFromFile(L"../DirectX_Coding/98_Shader/Default.hlsl", "VS", "vs_5_0", m_vsBlob);
@@ -355,7 +362,7 @@ void Main_Game::CreateVS()
 	assert(SUCCEEDED(hr));
 }
 
-void Main_Game::CreatePS()
+void Test_Game::CreatePS()
 {
 	LoadShaderFromFile(L"../DirectX_Coding/98_Shader/Default.hlsl", "PS", "ps_5_0", m_psBlob);
 
@@ -366,7 +373,73 @@ void Main_Game::CreatePS()
 	assert(SUCCEEDED(hr));
 }
 
-void Main_Game::CreateSRV()
+void Test_Game::CreateRasterizerState()
+{
+	D3D11_RASTERIZER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.FillMode = D3D11_FILL_SOLID;
+
+	// 뒷면에 오는 도형을 그리지 않겠다.
+	desc.CullMode = D3D11_CULL_BACK;	
+
+	// [FrontCounterClockwise 설정]
+	// 삼각형의 정점 나열 순서(Winding Order) 중 무엇을 '앞면'으로 판정할지 결정합니다.
+
+	// FALSE (기본값): 시계 방향(Clockwise)으로 그려진 삼각형을 앞면으로 인식합니다.
+	// TRUE: 반시계 방향(Counter-Clockwise)으로 그려진 삼각형을 앞면으로 인식합니다.
+
+	// 현재 CullMode가 CULL_BACK(뒷면 제거)이므로:
+	// 이 값이 FALSE라면 -> 반시계 방향 삼각형이 제거됨
+	// 이 값이 TRUE라면  -> 시계 방향 삼각형이 제거됨
+	desc.FrontCounterClockwise = FALSE;
+	// desc.FrontCounterClockwise = TRUE;
+
+	HRESULT hr = m_device->CreateRasterizerState(&desc, m_rasterizerState.GetAddressOf());
+	assert(SUCCEEDED(hr));
+}
+
+void Test_Game::CreateSamplerState()
+{
+	D3D11_SAMPLER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	desc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	desc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	desc.BorderColor[0] = 1.f;
+	desc.BorderColor[1] = 0.f;
+	desc.BorderColor[2] = 0.f;
+	desc.BorderColor[3] = 1.f;
+	desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	desc.MaxAnisotropy = 16;
+	desc.MaxLOD = FLT_MAX;
+	desc.MinLOD = FLT_MIN;
+	desc.MipLODBias = 0.0f;
+
+	m_device->CreateSamplerState( &desc, m_samplerState.GetAddressOf());
+}
+
+void Test_Game::CreateBlendState()
+{
+	D3D11_BLEND_DESC desc;
+	ZeroMemory(&desc, sizeof(D3D11_BLEND_DESC));
+	desc.AlphaToCoverageEnable = FALSE;
+	desc.IndependentBlendEnable = FALSE;
+
+	desc.RenderTarget[0].BlendEnable = TRUE;
+	desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	HRESULT hr = m_device->CreateBlendState(&desc, m_blendState.GetAddressOf());
+	assert(SUCCEEDED(hr));
+}
+
+void Test_Game::CreateSRV()
 {
 	DirectX::TexMetadata md;
 	DirectX::ScratchImage img;
@@ -379,7 +452,7 @@ void Main_Game::CreateSRV()
 	assert(SUCCEEDED(hr));
 }
 
-void Main_Game::CreateConstantBuffer()
+void Test_Game::CreateConstantBuffer()
 {
 	D3D11_BUFFER_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));

@@ -3,7 +3,7 @@
 #include "../99_Header/Main/pch.h"
 #include "../99_Header/Main/framework.h"
 #include "DirectX_Coding.h"
-#include "Main_Game.h"
+#include "Test_Game.h"
 
 #define MAX_LOADSTRING 100
 
@@ -31,7 +31,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
 
-    Main_Game game;
+    Test_Game game;
     game.Init(hWnd);
 
     MSG msg = {};

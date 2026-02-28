@@ -36,7 +36,7 @@ VS_OUTPUT VS(VS_INPUT input)	// ¹öÅØ½º ½¦ÀÌ´õ ´Ü°è¿¡¼­ SRT¸¦ ¿¬»êÇÏ¿© ¸ğµ¨À» º¯È
 
 float4 PS(VS_OUTPUT output) : SV_Target
 {
-	float4 color = texture0.Sample(sampler0, output.uv);
+	float4 color = texture0.Sample(sampler0, output.uv);		// ¾î¶°ÇÑ »ùÇÃÀÇ »ö»óÀÎÁö¸¦ °áÁ¤ÇÔ (Sample)
 	// return output.color;
 	return color;
 }

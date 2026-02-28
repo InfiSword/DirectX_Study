@@ -141,12 +141,12 @@
     <ClInclude Include="99_Header\Struct.h" />
     <ClInclude Include="99_Header\Types.h" />
     <ClInclude Include="99_Header\Values.h" />
-    <ClInclude Include="01_Main\Main_Game.h" />
+    <ClInclude Include="01_Main\Test_Game.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="01_Main\DirectX_Coding.cpp" />
     <ClCompile Include="99_Header\Main\pch.cpp" />
-    <ClCompile Include="01_Main\Main_Game.cpp" />
+    <ClCompile Include="01_Main\Test_Game.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="99_Header\Main\DirectX_Coding.rc" />

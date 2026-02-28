@@ -1,9 +1,9 @@
 #pragma once
-class Main_Game
+class Test_Game
 {
 public:
-	Main_Game();
-	~Main_Game();
+	Test_Game();
+	~Test_Game();
 
 public:
 	void Init(HWND _hWnd);
@@ -25,6 +25,9 @@ private:
 
 	void CreateVS();
 	void CreatePS();
+	void CreateRasterizerState();
+	void CreateSamplerState();
+	void CreateBlendState();
 	// 쉐이더 리소스 뷰
 	void CreateSRV();
 
@@ -69,6 +72,7 @@ private:
 
 	// Device & SwapChain
 	// 디바이스 관련 무언갈 생성할 때 사용
+	// 디바이스 버전도 여러 개라 이건 따로 검색해서 알아보면 좋을 듯
 	ComPtr<ID3D11Device> m_device = nullptr;
 	// 렌더링 파이프라인에 연결할 때 사용함
 	ComPtr<ID3D11DeviceContext> m_deviceContext = nullptr;
@@ -103,13 +107,18 @@ private:
 	ComPtr<ID3D11VertexShader> m_vertexShader = nullptr;
 	ComPtr<ID3DBlob> m_vsBlob = nullptr;
 
+	// RAS -> 레스터라이저
+	ComPtr<ID3D11RasterizerState> m_rasterizerState = nullptr;
+	
 	// PS -> 픽셀 쉐이더
 	ComPtr<ID3D11PixelShader> m_pixelShader = nullptr;
 	ComPtr<ID3DBlob> m_psBlob = nullptr;
 
-
 	//SRV
 	ComPtr<ID3D11ShaderResourceView> m_shaderResourceView = nullptr;
+
+	ComPtr<ID3D11SamplerState> m_samplerState = nullptr;
+	ComPtr<ID3D11BlendState> m_blendState = nullptr;
 
 private:
 	TransformData m_transformData;
